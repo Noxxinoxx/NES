@@ -1,18 +1,17 @@
 from fastapi import Request
 import datetime
 class ConnectionHandler:
-    def __init__(self, app):
-        self.source = ""
-        self.webhooks = ['radarr', 'sonarr']
+    def __init__(self, app, categorizer):
+        self.categorizer = categorizer
+        self.webhooks = ['radarr', 'sonarr', 'prowlarr']
         self.app = app
         self.route()
 
 
     def process_webhook(self, payload : dict):
         normalized_event = {
-            "source": self.source,
-            "event_type": payload.get("eventType", "unknown"),
-            "series_title": payload.get("series", {}).get("title", "unknown"),
+            "source": payload.get("instanceName", "unknown"),
+            "event_type": payload.get("eventType", "unknown"), 
             "timestamp": datetime.date.today(),
             "raw": payload
         }
@@ -23,10 +22,10 @@ class ConnectionHandler:
 
 
     def route(self):
-
         for hooks in self.webhooks:
             @self.app.post("/webhook/" + hooks)
             async def sonarr_webhook(request: Request):
                 payload = await request.json()
                 event = self.process_webhook(payload)
+
                 return {"status" : "ok", "event" : event}

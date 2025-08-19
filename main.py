@@ -1,12 +1,13 @@
-from fastapi import FastAPI, Request
-from NNS.Connections.Connect import ConnectionHandler
+from fastapi import FastAPI
+from Connections.Connect import ConnectionHandler
+from NNS.Helpers.categorizer import Categorizer
 
 app = FastAPI()
-
+categoriser = Categorizer("./config.json")
 
 class RouteHandler:
     def __init__(self):
         self.app = app
-        self.sonarr = ConnectionHandler(self.app)
+        self.sonarr = ConnectionHandler(self.app, categoriser)
 
 router = RouteHandler()

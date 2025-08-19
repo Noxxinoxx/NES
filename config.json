@@ -1,0 +1,12 @@
+{
+    "name" : "NNS Config",
+    "importance" : [
+        {
+            "name" : "Radarr",
+            "importance_critical" : ["OnMovieDelete", "OnHealthIssue"], 
+            "importance_high" : ["OnRename", "OnMovieAdded", "OnHealthRestored"], 
+            "importance_low" : ["*"]
+        }
+    ]
+
+}
