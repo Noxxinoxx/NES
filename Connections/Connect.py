@@ -3,7 +3,7 @@ import datetime
 class ConnectionHandler:
     def __init__(self, app, categorizer):
         self.categorizer = categorizer
-        self.webhooks = ['radarr', 'sonarr', 'prowlarr']
+        self.webhooks = ['radarr', 'sonarr', 'prowlarr', 'jellyseerr']
         self.app = app
         self.route()
 

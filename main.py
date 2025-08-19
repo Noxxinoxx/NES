@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from Connections.Connect import ConnectionHandler
-from NNS.Helpers.categorizer import Categorizer
+from Helpers.categorizer import Categorizer
 
 app = FastAPI()
 categoriser = Categorizer("./config.json")
