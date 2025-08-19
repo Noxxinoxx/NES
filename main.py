@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from Connections.sonarr import SonarrHandler
+from NNS.Connections.Connect import ConnectionHandler
 
 app = FastAPI()
 
@@ -7,6 +7,6 @@ app = FastAPI()
 class RouteHandler:
     def __init__(self):
         self.app = app
-        self.sonarr = SonarrHandler(self.app)
+        self.sonarr = ConnectionHandler(self.app)
 
 router = RouteHandler()
