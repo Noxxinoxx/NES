@@ -32,13 +32,13 @@ class Categorizer:
             if service["name"] == service_name:
                 # Check critical
                 if event in service.get("importance_critical", []):
-                    return {"category": 1, "level": "critical", "event" : event, "source" : service_name}
+                    return {"category": 1, "level": "critical", "event" : event, "source" : service_name,"raw" : notification_data}
                 # Check high
                 if event in service.get("importance_high", []):
-                    return {"category": 2, "level": "high", "event" : event ,"source" : service_name}
+                    return {"category": 2, "level": "high", "event" : event ,"source" : service_name,"raw" : notification_data}
                 # Check low
                 if "*" in service.get("importance_low", []) or event in service.get("importance_low", []):
-                    return {"category": 3, "level": "low", "event" : event,  "source" : service_name}
+                    return {"category": 3, "level": "low", "event" : event,  "source" : service_name, "raw" : notification_data}
 
         # Default if service not found or event not matched
-        return {"category": 3, "level": "low", "event" : event,  "source" : service_name}  # store silently
+        return {"category": 3, "level": "low", "event" : event,  "source" : service_name, "raw" : notification_data}  # store silently

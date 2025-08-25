@@ -1,8 +1,12 @@
 from fastapi import Request
 import datetime
+
+from Helpers.send_mail import sender
+
 class ConnectionHandler:
     def __init__(self, app, categorizer):
         self.categorizer = categorizer
+        self.sender = sender("nox@noxi.pro")
         self.webhooks = ['radarr', 'sonarr', 'prowlarr', 'jellyseerr']
         self.app = app
         self.route()
@@ -15,9 +19,13 @@ class ConnectionHandler:
             "timestamp": datetime.date.today(),
             "raw": payload
         }
-        ##save_event(normalized_event)
-        print(self.categorizer.categorize(normalized_event))
+        #save_event(normalized_event)
+        categorized_data = self.categorizer.categorize(normalized_event)
 
+
+
+        self.sender.set_email_info(categorized_data)    
+        self.sender.send_email_with_info()
         return normalized_event
 
 
@@ -28,5 +36,4 @@ class ConnectionHandler:
             async def sonarr_webhook(request: Request):
                 payload = await request.json()
                 event = self.process_webhook(payload)
-
                 return {"status" : "ok", "event" : event}
