@@ -16,7 +16,8 @@ class ConnectionHandler:
             "raw": payload
         }
         ##save_event(normalized_event)
-        print(normalized_event)
+        print(self.categorizer.categorize(normalized_event))
+
         return normalized_event
 
 

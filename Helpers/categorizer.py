@@ -23,8 +23,8 @@ class Categorizer:
             "event": "OnMovieAdded"
         }
         """
-        service_name = notification_data.get("service")
-        event = notification_data.get("event")
+        service_name = notification_data.get("source")
+        event = notification_data.get("event_type")
 
         # Find matching service in config
         importance_list = self.config.get("importance", [])
@@ -32,13 +32,13 @@ class Categorizer:
             if service["name"] == service_name:
                 # Check critical
                 if event in service.get("importance_critical", []):
-                    return {"category": 1, "level": "critical"}
+                    return {"category": 1, "level": "critical", "event" : event, "source" : service_name}
                 # Check high
                 if event in service.get("importance_high", []):
-                    return {"category": 2, "level": "high"}
+                    return {"category": 2, "level": "high", "event" : event ,"source" : service_name}
                 # Check low
                 if "*" in service.get("importance_low", []) or event in service.get("importance_low", []):
-                    return {"category": 3, "level": "low"}
+                    return {"category": 3, "level": "low", "event" : event,  "source" : service_name}
 
         # Default if service not found or event not matched
-        return {"category": 3, "level": "low"}  # store silently
+        return {"category": 3, "level": "low", "event" : event,  "source" : service_name}  # store silently
