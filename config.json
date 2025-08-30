@@ -1,5 +1,6 @@
 {
     "name" : "NNS Config",
+    "apis" : ["Calender"],
     "importance" : [
         {
             "name" : "Radarr",

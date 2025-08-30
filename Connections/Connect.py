@@ -1,12 +1,11 @@
 from fastapi import Request
 import datetime
 
-from Helpers.send_mail import sender
+from NNS.NNSAS.Connections.send_mail import sender
 
 class ConnectionHandler:
     def __init__(self, app, categorizer):
         self.categorizer = categorizer
-        self.sender = sender("nox@noxi.pro")
         self.webhooks = ['radarr', 'sonarr', 'prowlarr', 'jellyseerr']
         self.app = app
         self.route()
@@ -21,11 +20,8 @@ class ConnectionHandler:
         }
         #save_event(normalized_event)
         categorized_data = self.categorizer.categorize(normalized_event)
+        print(categorized_data)
 
-
-
-        self.sender.set_email_info(categorized_data)    
-        self.sender.send_email_with_info()
         return normalized_event
 
 
