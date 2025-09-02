@@ -2,10 +2,13 @@ from fastapi import Request
 import datetime
 
 from NNS.NNSAS.Connections.send_mail import sender
+from NNS.Connections.kafka import Sender
+
 
 class ConnectionHandler:
     def __init__(self, app, categorizer):
         self.categorizer = categorizer
+        self.kafka = Sender()
         self.webhooks = ['radarr', 'sonarr', 'prowlarr', 'jellyseerr']
         self.app = app
         self.route()
@@ -20,9 +23,11 @@ class ConnectionHandler:
         }
         #save_event(normalized_event)
         categorized_data = self.categorizer.categorize(normalized_event)
-        print(categorized_data)
+        #send event to kafka.
 
-        return normalized_event
+        self.kafka.send(categorized_data)
+        
+        return {"status" : 200}
 
 
 

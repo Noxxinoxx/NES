@@ -8,6 +8,6 @@ categoriser = Categorizer("./config.json")
 class RouteHandler:
     def __init__(self):
         self.app = app
-        self.sonarr = ConnectionHandler(self.app, categoriser)
+        self.handler = ConnectionHandler(self.app, categoriser)
 
 router = RouteHandler()
