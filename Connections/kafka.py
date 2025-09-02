@@ -1,9 +1,9 @@
-from confluent_kafka import Producer, Consumer
+from confluent_kafka import Producer
 import json
 
 class Sender:
     def __init__(self):
-        self.conf = {"bootstrap.servers" : "192.168.2.205:9092"}
+        self.conf = {"bootstrap.servers" : "localhost:29092"}
         self.topic_send = "notifications.send"
         self.topic_save = "notifications.save"
         self.producer = Producer(self.conf)

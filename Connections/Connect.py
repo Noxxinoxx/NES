@@ -1,8 +1,7 @@
 from fastapi import Request
 import datetime
 
-from NNS.NNSAS.Connections.send_mail import sender
-from NNS.Connections.kafka import Sender
+from Connections.kafka import Sender
 
 
 class ConnectionHandler:
@@ -18,7 +17,7 @@ class ConnectionHandler:
         normalized_event = {
             "source": payload.get("instanceName", "unknown"),
             "event_type": payload.get("eventType", "unknown"), 
-            "timestamp": datetime.date.today(),
+            "timestamp": datetime.date.today().isoformat(),
             "raw": payload
         }
         #save_event(normalized_event)
