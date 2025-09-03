@@ -1,8 +1,7 @@
-# WELCOME TO NNS
+# WELCOME TO NES
 
-NNS is a system designed to handle notifications for my home lab server NoxDrive.
-
-The system will work very closly with my API service Nox_API.
+Changes has been made to the project and it is now called NES this stands for
+Nox Enterprice System instead for NNS that has been absorbed and is now part of the NES.
 
 Nox
 
