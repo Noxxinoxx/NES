@@ -1,7 +1,7 @@
 from fastapi import Request
 import datetime
 
-from Connections.kafka import Sender
+from common.kafka_sender import Sender
 
 
 class ConnectionHandler:
