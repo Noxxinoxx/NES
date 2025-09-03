@@ -2,13 +2,14 @@ from confluent_kafka import Consumer
 from pymongo import MongoClient
 import json
 
+print("updated and running!")
 # Kafka Config
-KAFKA_BOOTSTRAP_SERVERS = "localhost:29092"
-KAFKA_TOPICS = ["notifications.save", "notifications.send"]
+KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
+KAFKA_TOPICS = ["notifications.save"]
 KAFKA_GROUP = "mongo-consumer-group"
 
 # Mongo Config
-MONGO_URI = "mongodb://admin:Nox1234@localhost:27017/"
+MONGO_URI = "mongodb://admin:Nox1234@mongodb:27017/"
 DB_NAME = "NNS"
 COLLECTION_NAME = "events"  # your collection name
 

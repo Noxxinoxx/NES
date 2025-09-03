@@ -14,10 +14,17 @@ class ConnectionHandler:
 
 
     def process_webhook(self, payload : dict):
+
+        if "notification_type" in payload:
+            source = "jellyseerr"
+            event_type = payload.get("notification_type", "unknown")
+        else:
+            source = payload.get("instanceName", "unknown")
+            event_type = payload.get("eventType", "unknown")
         normalized_event = {
-            "source": payload.get("instanceName", "unknown"),
-            "event_type": payload.get("eventType", "unknown"), 
-            "timestamp": datetime.date.today().isoformat(),
+            "source": source,
+            "event_type": event_type, 
+            "timestamp": datetime.datetime.now().isoformat(),
             "raw": payload
         }
         #save_event(normalized_event)
