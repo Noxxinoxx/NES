@@ -3,7 +3,6 @@ from pymongo import MongoClient
 import json
 
 print("updated and running!")
-print("testing things!")
 # Kafka Config
 KAFKA_BOOTSTRAP_SERVERS = "kafka:9092"
 KAFKA_TOPICS = ["notifications.save"]
