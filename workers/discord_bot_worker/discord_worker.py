@@ -22,7 +22,7 @@ consumer_conf = {
     "auto.offset.reset": "earliest"
 }
 consumer = Consumer(consumer_conf)
-consumer.subscribe(["notifications.send"])
+consumer.subscribe(["notifications.send", "alerts"])
 
 # -------------------------------
 # Build Discord embed
@@ -87,6 +87,43 @@ def build_discord_embed(payload: str) -> Embed:
 
     return embed
 
+
+def discord_alert_message(payload: str):
+    try:
+        data = json.loads(payload)
+    except Exception:
+        return Embed(
+            title="Invalid alert",
+            description=payload[:200],
+            color=0xff0000
+        )
+
+    service = data.get("service", "Unknown Service")
+    level = data.get("level", "info").lower()
+    category = data.get("category", "N/A")
+    message = data.get("message", "No details")
+    timestamp = data.get("timestamp", "Unknown time")
+
+    # Severity colors
+    colors = {
+        "error": 0xff0000,   # red
+        "warn": 0xffa500,    # orange
+        "info": 0x00ff00     # green
+    }
+    color = colors.get(level, 0x00ff00)
+
+    # Build embed in your style
+    embed = Embed(title=f"{service} Alert", color=color)
+    embed.add_field(name="Level", value=level.upper(), inline=False)
+    embed.add_field(name="Category", value=str(category), inline=False)
+    embed.add_field(name="Timestamp", value=timestamp, inline=False)
+
+    embed.description = message
+
+    return embed
+
+
+
 # -------------------------------
 # Main loop: poll Kafka & send Discord
 # -------------------------------
@@ -100,9 +137,15 @@ try:
         if msg.error():
             print(f"Kafka error: {msg.error()}")
             continue
-
+        print(msg.topic())
+        
         payload = msg.value().decode("utf-8")
-        embed = build_discord_embed(payload)
+        if msg.topic() == "alerts":      
+            embed = discord_alert_message(payload)
+        else:   
+            embed = build_discord_embed(payload)
+
+
         try:
             webhook.send(embed=embed)
             print(f"[Discord] Sent embed for message: {payload[:100]}...")
