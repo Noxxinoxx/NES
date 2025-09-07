@@ -13,9 +13,9 @@
             "importance_high" : ["Rename", "MovieAdded", "HealthRestored", "Download"], 
             "importance_low" : ["*"]
         },{
-            "name" : "Jellyseerr",
+            "name" : "jellyseerr",
             "importance_critical": ["MEDIA_FAILED", "MEDIA_ADDED", "SYSTEM_ERROR", "REQUEST_FAILED"],
-            "importance_high": ["REQUEST_AUTO_APPROVED", "REQUEST_AUTO_DENIED", "REQUEST_COMPLATED"],
+            "importance_high": ["REQUEST_AUTO_APPROVED", "REQUEST_AUTO_DENIED", "REQUEST_COMPLATED", "ISSUE_CREATED"],
             "importance_low" : ["*"]
         }
     ]

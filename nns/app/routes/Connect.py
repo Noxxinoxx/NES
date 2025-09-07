@@ -31,7 +31,10 @@ class ConnectionHandler:
         categorized_data = self.categorizer.categorize(normalized_event)
         #send event to kafka.
 
-        self.kafka.send(categorized_data)
+        self.kafka.save(categorized_data)
+
+        if categorized_data["category"] != 3:
+            self.kafka.send(categorized_data)
         
         return {"status" : 200}
 

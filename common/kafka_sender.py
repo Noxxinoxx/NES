@@ -20,9 +20,11 @@ class Sender:
 
     def send(self,json_data):       
         #send the kafka event to tells that we both want to save and send to notification.
-        self.producer.produce(self.topic_save, value=json.dumps(json_data), callback=self.delivery_report) 
+        self.producer.produce(self.topic_send, value=json.dumps(json_data), callback=self.delivery_report) 
         self.producer.flush()
-        self.producer.produce(self.topic_send, value=json.dumps(json_data), callback=self.delivery_report)
+
+    def save(self, json_data):
+        self.producer.produce(self.topic_save, value=json.dumps(json_data), callback=self.delivery_report) 
         self.producer.flush()
 
     def send_alert(self, json_data):

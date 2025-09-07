@@ -33,13 +33,27 @@ def build_discord_embed(payload: str) -> Embed:
     except Exception:
         return Embed(title="Invalid message", description=payload[:200], color=0xff0000)
 
-    raw = data.get("raw", {}).get("raw", {})
-    instance = raw.get("instanceName") or raw.get("source", "Unknown")
-    event_type = data.get("event", raw.get("event_type", "Unknown Event"))
+    print(payload)
 
-    embed = Embed(title=f"{instance} Notification", color=0x00ff00)
+    raw = data.get("raw", {}).get("raw", {})
+    instance = raw.get("instanceName") or data.get("source", "Unknown")
+    level = data.get("level", "Unknown")
+    event_type = data.get("event", raw.get("event_type", "Unknown Event"))
+    
+    # Severity colors
+    colors = {
+        "critical": 0xff0000,   # red
+        "high": 0xffa500,    # orange
+        "low": 0x00ff00     # green
+    }
+    color = colors.get(level, 0x00ff00)
+
+
+    embed = Embed(title=f"{instance} Notification", color=color)
     embed.add_field(name="Event Type", value=event_type, inline=False)
     embed.add_field(name="Source", value=instance, inline=False)
+    embed.add_field(name="Event Level", value=level, inline=False)
+
 
     description = ""
     image_url = None
@@ -137,7 +151,6 @@ try:
         if msg.error():
             print(f"Kafka error: {msg.error()}")
             continue
-        print(msg.topic())
         
         payload = msg.value().decode("utf-8")
         if msg.topic() == "alerts":      
