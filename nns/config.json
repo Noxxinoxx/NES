@@ -5,12 +5,12 @@
         {
             "name" : "Radarr",
             "importance_critical" : ["MovieDelete", "HealthIssue"], 
-            "importance_high" : ["Rename", "MovieAdded", "HealthRestored", "Download"], 
+            "importance_high" : ["Rename", "MovieAdded", "HealthRestored"], 
             "importance_low" : ["*"]
         },{
             "name" : "Sonarr",
             "importance_critical" : ["MovieDelete", "HealthIssue"], 
-            "importance_high" : ["Rename", "MovieAdded", "HealthRestored", "Download"], 
+            "importance_high" : ["Rename", "MovieAdded", "HealthRestored"], 
             "importance_low" : ["*"]
         },{
             "name" : "jellyseerr",

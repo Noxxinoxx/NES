@@ -55,15 +55,37 @@ func getUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, results)
 }
 
+func getFilters(c echo.Context) error {
+	eventsColl := client.Database("NNS").Collection("events")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filterNames := []string{"category", "level", "event", "source"}
+	result := make(map[string][]interface{})
+
+	for _, field := range filterNames {
+		values, err := eventsColl.Distinct(ctx, field, bson.M{})
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		}
+		result[field] = values
+	}
+
+	return c.JSON(http.StatusOK, result)
+}
+
 func main() {
 	initMongo()
 
 	e := echo.New()
+	e.Static("/static/", "static")
+
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, 1orld")
+		return c.File("static/main.html")
 	})
 
-	e.GET("/events", getUsers)
+	e.GET("api/events", getUsers)
+	e.GET("/api/getFilters", getFilters)
 
 	e.Logger.Fatal(e.Start(":3012"))
 	print("ekeke")
