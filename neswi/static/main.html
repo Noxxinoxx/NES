@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MongoDB Viewer Live</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <header class="bg-gray-800 text-white p-4">
+    <h1 class="text-2xl font-bold">MongoDB Log Viewer</h1>
+  </header>
+
+  <main class="p-6 space-y-6">
+    <!-- Filter dropdowns -->
+    <div id="filterContainer" class="flex flex-wrap gap-3">
+      <!-- JS will render dropdowns here -->
+    </div>
+
+    <!-- Scrollable list -->
+    <div id="entries" class="space-y-4 max-h-[70vh] overflow-y-auto p-2 border rounded bg-white">
+      <!-- JS will render cards here -->
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="jsonModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+    <div class="bg-white rounded-lg w-11/12 md:w-3/4 lg:w-1/2 max-h-[80vh] flex flex-col">
+      <div class="flex justify-between items-center p-4 border-b">
+        <h3 class="text-lg font-semibold">Raw JSON</h3>
+        <button id="closeModal" class="text-gray-500 hover:text-black text-xl">&times;</button>
+      </div>
+      <div class="overflow-y-auto p-4 text-sm bg-gray-50 flex-1">
+        <pre id="modalContent" class="whitespace-pre-wrap"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let mongoEntries = [];        // will hold /events data
+    let filters = {};             // will hold /api/filters data
+    let activeFilters = {};       // currently selected filters
+
+    const filterContainer = document.getElementById('filterContainer');
+    const entriesContainer = document.getElementById('entries');
+    const modal = document.getElementById('jsonModal');
+    const modalContent = document.getElementById('modalContent');
+    const closeModal = document.getElementById('closeModal');
+
+    // --- Render entries ---
+    function renderEntries(data) {
+      entriesContainer.innerHTML = '';
+      data.forEach(entry => {
+        const card = document.createElement('div');
+        card.className = 'border rounded p-4 hover:bg-gray-50 cursor-pointer';
+        card.innerHTML = `
+          <p class="font-mono text-sm text-gray-600">_id: ${entry._id}</p>
+          <p>
+            <span class="font-semibold">Category:</span> ${entry.category} |
+            <span class="font-semibold">Level:</span> ${entry.level} |
+            <span class="font-semibold">Event:</span> ${entry.event} |
+            <span class="font-semibold">Source:</span> ${entry.source} |
+            <span class="font-semibold">Time:</span> ${entry.time_stamp}
+          </p>
+        `;
+        card.addEventListener('click', () => {
+          modalContent.textContent = JSON.stringify(entry, null, 2);
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+        entriesContainer.appendChild(card);
+      });
+    }
+
+    // --- Modal close ---
+    closeModal.addEventListener('click', () => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    });
+
+    // --- Apply filters ---
+    function applyFilters() {
+      const filtered = mongoEntries.filter(entry => {
+        return Object.keys(activeFilters).every(fName => {
+          const val = activeFilters[fName];
+          if (!val || val === 'all') return true;
+          return String(entry[fName]).toLowerCase() === String(val).toLowerCase();
+        });
+      });
+      renderEntries(filtered);
+    }
+
+    // --- Build dropdowns dynamically ---
+    function buildFilterDropdowns() {
+      filterContainer.innerHTML = '';
+      Object.entries(filters).forEach(([name, values]) => {
+        const select = document.createElement('select');
+        select.className = 'px-3 py-2 border rounded';
+        select.innerHTML = `<option value="all">All ${name}</option>` + 
+          values.map(v => `<option value="${v}">${v}</option>`).join('');
+        select.addEventListener('change', (e) => {
+          activeFilters[name] = e.target.value;
+          applyFilters();
+        });
+        filterContainer.appendChild(select);
+      });
+    }
+
+    // --- Fetch filters from /api/filters ---
+    async function fetchFilters() {
+      try {
+        const res = await fetch('/api/getFilters');
+        if (!res.ok) throw new Error('Failed to fetch filters');
+        filters = await res.json();
+        buildFilterDropdowns();
+        Object.keys(filters).forEach(k => activeFilters[k] = 'all');
+      } catch (err) {
+        console.error(err);
+        // fallback example filters if API fails
+        filters = { level: ["high","low"], event:["Download","Update"], source:["Sonarr","Radarr"] };
+        buildFilterDropdowns();
+        Object.keys(filters).forEach(k => activeFilters[k] = 'all');
+      }
+    }
+
+    // --- Fetch entries from /events ---
+    async function fetchEvents() {
+      try {
+        const res = await fetch('/api/events');
+        if (!res.ok) throw new Error('Failed to fetch events');
+        mongoEntries = await res.json();
+        applyFilters();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // --- Initial fetch ---
+    fetchFilters().then(fetchEvents);
+
+    // Optional: Auto refresh every 30s
+    setInterval(fetchEvents, 30000);
+  </script>
+</body>
+</html>
