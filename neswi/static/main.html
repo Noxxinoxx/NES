@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MongoDB Viewer Live</title>
+  <title>MongoDB Log Viewer</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -12,15 +12,31 @@
   </header>
 
   <main class="p-6 space-y-6">
+    <!-- Entries Counter -->
+    <div class="flex items-center justify-between bg-white p-4 rounded shadow">
+      <h2 class="text-lg font-semibold text-gray-700">
+        Entries: <span id="entryCount" class="text-gray-900 font-bold">0</span>
+      </h2>
+    </div>
     <!-- Filter dropdowns -->
-    <div id="filterContainer" class="flex flex-wrap gap-3">
-      <!-- JS will render dropdowns here -->
+
+    <div id="filterContainer" class="flex flex-wrap gap-3 items-end">
+      <!-- Dynamic filters go here -->
     </div>
 
+    <!-- Sort Order Button -->
+    <div>
+      <button id="toggleSort" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+        Show Oldest First
+      </button>
+    </div>
     <!-- Scrollable list -->
     <div id="entries" class="space-y-4 max-h-[70vh] overflow-y-auto p-2 border rounded bg-white">
       <!-- JS will render cards here -->
     </div>
+    
+  
+  
   </main>
 
   <!-- Modal -->
@@ -37,15 +53,17 @@
   </div>
 
   <script>
-    let mongoEntries = [];        // will hold /events data
-    let filters = {};             // will hold /api/filters data
-    let activeFilters = {};       // currently selected filters
+    let mongoEntries = [];
+    let filters = {};
+    let activeFilters = {};
+    let sortOrder = 'desc'; // newest first by default
 
     const filterContainer = document.getElementById('filterContainer');
     const entriesContainer = document.getElementById('entries');
     const modal = document.getElementById('jsonModal');
     const modalContent = document.getElementById('modalContent');
     const closeModal = document.getElementById('closeModal');
+    const toggleSortBtn = document.getElementById('toggleSort');
 
     // --- Render entries ---
     function renderEntries(data) {
@@ -78,15 +96,23 @@
       modal.classList.remove('flex');
     });
 
-    // --- Apply filters ---
+    // --- Apply filters & sort locally ---
     function applyFilters() {
-      const filtered = mongoEntries.filter(entry => {
+      let filtered = mongoEntries.filter(entry => {
         return Object.keys(activeFilters).every(fName => {
           const val = activeFilters[fName];
           if (!val || val === 'all') return true;
           return String(entry[fName]).toLowerCase() === String(val).toLowerCase();
         });
       });
+
+      // Sort by time_stamp
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.time_stamp);
+        const dateB = new Date(b.time_stamp);
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      });
+
       renderEntries(filtered);
     }
 
@@ -100,7 +126,7 @@
           values.map(v => `<option value="${v}">${v}</option>`).join('');
         select.addEventListener('change', (e) => {
           activeFilters[name] = e.target.value;
-          applyFilters();
+          fetchEvents(); // refetch with server filters applied
         });
         filterContainer.appendChild(select);
       });
@@ -116,29 +142,41 @@
         Object.keys(filters).forEach(k => activeFilters[k] = 'all');
       } catch (err) {
         console.error(err);
-        // fallback example filters if API fails
-        filters = { level: ["high","low"], event:["Download","Update"], source:["Sonarr","Radarr"] };
-        buildFilterDropdowns();
-        Object.keys(filters).forEach(k => activeFilters[k] = 'all');
       }
     }
 
-    // --- Fetch entries from /events ---
+    // --- Fetch events with filters ---
     async function fetchEvents() {
+      // Build query params
+      const params = new URLSearchParams();
+      Object.keys(activeFilters).forEach(k => {
+        if (activeFilters[k] && activeFilters[k] !== 'all') {
+          params.append(k, activeFilters[k]);
+        }
+      });
+
       try {
-        const res = await fetch('/api/events');
+        const res = await fetch('/api/events?' + params.toString());
         if (!res.ok) throw new Error('Failed to fetch events');
         mongoEntries = await res.json();
+        document.getElementById("entryCount").innerText = mongoEntries.length
         applyFilters();
       } catch (err) {
         console.error(err);
       }
     }
 
+    // --- Toggle sort order ---
+    toggleSortBtn.addEventListener('click', () => {
+      sortOrder = (sortOrder === 'desc') ? 'asc' : 'desc';
+      toggleSortBtn.textContent = (sortOrder === 'desc') ? 'Show Oldest First' : 'Show Newest First';
+      applyFilters();
+    });
+
     // --- Initial fetch ---
     fetchFilters().then(fetchEvents);
 
-    // Optional: Auto refresh every 30s
+    // Optional auto refresh
     setInterval(fetchEvents, 30000);
   </script>
 </body>
