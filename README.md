@@ -1,5 +1,9 @@
 # WELCOME TO NES
 
+
+This project has been moved to a private Gitea and will be archived.
+
+
 Changes has been made to the project and it is now called NES this stands for
 Nox Enterprice System instead for NNS that has been absorbed and is now part of the NES.
 
